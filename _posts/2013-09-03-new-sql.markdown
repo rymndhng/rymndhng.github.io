@@ -1,0 +1,174 @@
+---
+layout: post
+title: "New SQL"
+date: 2013-09-03 21:29
+comments: true
+categories: SQL, Database
+---
+
+# Current Marketplace
+- Data warehouses benefit from column store
+- Column stores have better performance (100x faster)
+- OLTP (100x faster)
+
+# Star-schema
+- who bought what, where when?
+- millions of entries surrounded by dimensions
+  - dimensions are who what.. etc
+- i.e. Walmart
+  - central **fact** table is surrounded by products, users, purchases
+  - wide, 100 column fact table
+  - no one reads all of the rows at once (typically 4-5 rows)
+  - Row Store database reads all 100 at once (whether you want to or not)
+  - Column store means you only read the ones you need (in this example, 25x faster IO)
+  - current systems tries to compress all data like mad
+    - columns compress 3x better than rows 
+      1. only compressing one thing
+      2. column stores dont have headers for every row
+
+# Participants
+- Column store vendors (native)
+  - HP/Vertica, SAP/Hana, Paraccel (Amazon), SAp/Sybase/IQ
+- Native Row store
+  - Microsoft, Oracle, DB2, Netezza
+- Transition
+  - Teradata, Asterdata, Greenplum
+
+# Column Stores on Vertica
+- leftmost -> sorted
+- rightmost -> less likely to be sorted
+- chunks are stored in 64K, left is uncompressed, remainder are compressed
+- column oriented execution -- you never pick up a row
+- are loads to column stores slow?
+  - need to add index to 100 different locations (?)
+  - Vertica uses row storage in main memory
+    - rotate/compress in slabs
+- does not need record keeping/row optimizing
+- basically warehouses are always best using Column based
+
+# OLTP Databases
+- traditionally row oriented
+- three problems
+  - main memory vs disk orientation
+  - replication (we need reliability)
+  - transaction control (yep)
+
+## Current Situation
+- OLTP databases aren't big -- increases by size of business expansion
+- size of 1 TB - 10 TB is really big (but generally not Facebook big)
+- 1 TB can fit into $30k main memory (64GB in 16 servers)
+- most likely database does not fit in main memory
+
+## Main Memory Performance
+- traditional wisdom...
+- assuming data fits in main memory...
+  - "useful work" is only 4%, 96% goes to overhead
+    - 24% Buffer Pool Management -> data out of buffer, decoding out of scheme, reencoding, managing LRU etc.
+    - 24% Record Level Dynamic Locking - making read/lock writes to the data
+    - 24% Recovery Mohan's Log Latching -- must be carefully managed and group committed
+    - 24% Latch -- making multi-core cpus synchornize ... and recover from garbage
+      - B-Tree is shared
+      - lock table -> needs latch
+      - need temporary space to sort stuff (?)
+
+### To Go Fast
+- cannot go fast without getting rid of 4 slices... can't get much faster (Amadhl's Law)
+- fancy B-tree structures make no difference
+
+## How to get rid of four pie pieces
+- Single Threading
+  - simple
+  - no latching overhead b/c nothing shared
+  - H-Store & VoltDB do this
+    - statically divide main memory for each CPU in multicore (each act independently)
+- all current RDBMS have this latching overhead
+
+## Main Memory
+- without main memory screwed -- 24% overhead from Buffers
+
+## Concurrency Control
+- dynamic locking: solve with
+  - Timestamp order 
+  - MVCC NuoDB, Hekaton
+  - Timestamp/Dynamic locking
+- row-level dynamic locking is too slow
+- what to replace it with... best idea is not yet determined
+
+## Reality Check -- High Availability (HA)
+- back in the day OLTP system going down was not a big deal -- reboot and we're ok
+- now... it's NOT OK, need high availability!
+- need replication (multi-node)
+
+## Implementing HA
+- two ways:
+  - replicas are ACID
+    - transactions are either done or not done at all replicas
+  - eventual consistency
+    - if we turn off transactions, and let enough time go by... the replicas will converge to the same answer
+  - eventual consistency does not mean eventual consistency
+    - e.g. two customers at two sites each buy the last widget... uh oh (first system crashed, therefore second system doesn't know)
+    - works only if transactions are commutitive (order doesn't matter)
+    - NoSQL tries to explain exactly the semantics of this... no protection!
+- if you need ACID and the system doesn't provide it -- you will tear your head apart
+
+## HOw to implement
+- Active-Passive
+  - requires writing to log
+  - one of four slices back -> means go slow
+- Active-Active
+  - send only transaction, not the effect of transaction
+  - combined with ACID, can perform read on any replica -> A-OK
+
+## Reality Check - Power Failures
+- few sites have UPS
+- cannot lose data on power failure!! (b/c of main memory system)
+- replications won't help unless you get it out of ur datacenter (expensive)
+- two options to solve
+  - bring back log (and pie slice) ~slow (Mohan)
+  - write only command log plus async checkpoints (?)
+
+## Aries vs Command Log
+- command logging 3x faster but 3x slower in recovery (from error)
+- most of the time, recovery is in parallel to running up-copy
+
+## Active-Active will Cream Active-Passive
+- big win if you have one node where power goes out
+- big win in replication support
+- if **true** then active-passive dead (it's way too slow)
+  - in theory , needs study
+
+## MVCC + Active-Active
+- cannot guarantee order things happen 
+- not deterministic
+  - screwed (overhead to detect diferences)
+- not compatible
+- use only concurrency control with deterministic results => timestamp ordering
+
+## Main Memory not fitting
+- if returning back to disk -> slow
+- H-Store (Memory-based DB)
+  - throws records out of main memory into archive to save memory
+  - main memory format only -- no disk memory format
+  - there are no stalls, otherwise things go super slow
+    - if there are misses, marked and then waits until all data in main memory
+
+## Anti-Caching (waiting til eveyrthing in memory)
+- kills MySQL by a factor of 50 
+- wildly faster when everything in memory
+- when data doesn't fit, MySQL slows down... but so does H-Store
+  - MySQL slows down faster than H-Store
+    - converting back/forth between disk format and main memory format is expensive (mysql does this)
+    - MySQL brings an entire block and takes up big memory
+    - H-Store only takes in what it needs, leaves the rest behind
+    - H-Store is much more flexible in what to pull from cache
+
+## MemcacheD in front of MySQL
+- doesn't help => H-Store is still faster
+  - memory efficiency goes down (one in MemcacheD, another in MySQL)
+- super fast if everything is read only
+
+## Future of OLTP
+- main memory with anti-caching
+- deterministic concurrency control (timestamps)
+- HA via active-active
+- **All goes against conventional wisdom**
