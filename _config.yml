@@ -1,3 +1,25 @@
-name: To the Interwebs and Back
-markdown: redcarpet
-pygments: true
+# Dependencies
+markdown:         redcarpet
+pygments:         true
+
+# Permalinks
+permalink:        pretty
+
+# Setup
+title:            To the Interwebs and Back
+tagline:          'A bit of stuff on exploratory programming...'
+description:      'Personal blog on programming and writing practise.'
+url:              http://rymndhng.com
+
+author:
+  name:           'Ray H'
+  url:            https://twitter.com/rymndhng
+
+paginate:         5
+
+# Custom vars
+version:          1.0.0
+
+github:
+  url:            https://github.com/rymndhng
+  repo:           https://github.com/rymndhng/rymndhng.github.com
