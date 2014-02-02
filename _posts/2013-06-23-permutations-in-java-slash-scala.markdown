@@ -3,7 +3,7 @@ layout: post
 title: "Permutations in Java/Scala"
 date: 2013-06-23 03:14
 comments: true
-categories: [algorithms, Java, Scala]
+tags: algorithms java scala
 ---
 
 In the process of studying for programming interviews, I stumbled across a problem which involved finding permutations of a list of string elements. The implementation the book describes uses a Permutation class as follows:

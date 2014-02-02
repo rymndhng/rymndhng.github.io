@@ -3,7 +3,7 @@ layout: post
 title: "Spring from other MVC"
 date: 2013-07-23 14:33
 comments: true
-categories: 
+tags: blah
 ---
 
 I've done CodeIgniter, RoR, Java/Play!, Scala/Play! and contrast to Spring, it's
