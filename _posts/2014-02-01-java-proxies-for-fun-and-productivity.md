@@ -192,20 +192,6 @@ Raw invocation handlers do not provide enough abstraction for regular use. What 
 
 This is where Dynamic proxies come in. Dynamic proxies pretend to be implementations of of interfaces and instead delegate the actual work to a `InvocationHandler`. This pattern allows us to build and compose objects out of reusable components which cannot generally be reused otherwise (such as this post).
 
-The gist of what we need to do is to create a factory that creates a proxy of `PostRepository` that uses the `InvocationHandler` called `ValidationHandler`. We implement this as a static method on `ValidationHandler`
-
-```java
-public class `ValidationHandler`
-
-Proxy.newProxyInstance(cl,
-                delegate.getClass().getInterfaces(),
-                new ServiceValidationHandler<>(delegate));
-
-```
-
-
-Dynamic proxies are objects which delegate their work to actual implementations. It behaves function decorators if you come from a Python background. It intercept method calls allowing developers to add custom behaviors before and after invoking the method. We first need to create an instance of a proxy, and then override it's default behavior to parse our annotation.
-
 ##### Create a Dynamic Proxy
 Creating a dynamic proxy is simply done by using a Factory method to construct an instance of it. The code looks like the following. Our dynamic proxy maker will be called `ValidationInvoker`.
 
