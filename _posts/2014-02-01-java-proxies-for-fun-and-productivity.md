@@ -4,6 +4,7 @@ title: "Dynamic Proxies for Fun and Productivity"
 date: 2014-02-01
 comments: true
 tags: Java AOP dry proxy
+category: java
 ---
 
 Dynamic proxies are one way of making reusing code by adding a layer of indirection. It provides the building blocks for the behaviors of frameworks which you may have seen like Spring MVC.
@@ -75,7 +76,7 @@ public interface PostRepository {
 ```
 
 ```java
-public PostRepositoryImpl implements PostRepository { 
+public PostRepositoryImpl implements PostRepository {
 
     public getPosts(String bucketId, DateRange range) {
         // some implementation
@@ -207,7 +208,7 @@ public class ValidationHandler<T> implements InvocationHandler {
 }
 ```
 
-This method takes an instance of T, our `delegate`, whose methods we want to intercept. From it's interfaces, we build a proxy that delegates the work to an instance of 
+This method takes an instance of T, our `delegate`, whose methods we want to intercept. From it's interfaces, we build a proxy that delegates the work to an instance of
 `ValidationHandler`. We cast the proxy back to type T, which is perfect because it hides all the implementation details of the proxy. i.e. Passing a `PostRepository` in will return back a `PostRepository`.
 
 The only gotcha here is it only works if `T` comes from an __interface__. Proxies can only mock interfaces, therefore `newInstance` will throw an exception if `T` is a class.
@@ -218,7 +219,7 @@ A snippet of how this works below. (Untested)
 ```java
 public static void main(String[] args) {
 
-    // newInstance returns 
+    // newInstance returns
     PostRepository repository =  ValidationHandler.newInstance(new PostRepositoryImpl());
     repository.getPosts("*@#()", new DateRange())
     // => throws exception: BucketException("bucketId has invalid format")
@@ -246,3 +247,6 @@ _Will make working example code if people are interested._
 Feel free to message me if you have any thoughts, suggestions or questions in this post.
 
 
+##### TODO: explain the markup bit about it
+##### TODO: distill it down to core concepts
+##### TODO: what the hell is a validationInvoker

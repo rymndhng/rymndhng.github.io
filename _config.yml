@@ -1,15 +1,15 @@
 # Dependencies
 markdown:         redcarpet
-pygments:         true
+highlighter:      pygments
 
 # Permalinks
 permalink:        pretty
 
 # Setup
-title:            To the Interwebs and Back
-tagline:          'A bit of stuff on exploratory programming...'
-description:      'Personal blog on programming and writing practise.'
-url:              http://rymndhng.com/blog
+title:            I.AM.RYMNDHNG
+tagline:          'Software Craftsman, Open Data & Vis'
+description:      'Always another project away from something big.'
+url:              http://www.rymndhng.com/blog
 
 author:
   name:           'Ray H'
@@ -22,3 +22,6 @@ version:          1.0.0
 
 github:
   url:            https://github.com/rymndhng
+
+twitter:
+  url:            https://twitter.com/rymndhng

@@ -1,10 +1,24 @@
 ---
 layout: default
-title: To the Interwebs and back
+title: Ray's Brain Dump
 ---
 
+<div id="info">
+  <h2> About Me </h2>
+  <div style="float: right">
+    <ul class="connectors">
+      <li><a href="{{site.github.url}}">Github</a></li>
+      <li><a href="{{site.twitter.url}}">Twitter</a></li>
+    </ul>
+  </div>
+  <p>
+  I am a full-stack software developer who dabbles in Java, Javascript, Python & Clojure.
+  </p>
+  <p>A list of projects I've worked on are available <a href="projects">here</a>.</p>
+</div>
+<hr/>
 <div id="home">
-  <h1>Blog Posts</h1>
+  <h2>Blog Posts</h2>
   <ul class="posts">
     {% for post in site.posts %}
       <li><span>{{ post.date | date_to_string }}</span> &raquo; <a href="{{ post.url }}">{{ post.title }}</a></li>
