@@ -1,24 +1,50 @@
 ---
 layout: post
 title: "MySQL Speedup"
-date: 2013-09-03 21:29
+date: 2014-02-12 21:29
 comments: true
 categories: SQL, Database
 ---
 
-Normally, with Database backed applications, the most important thing is
-developer productivity, or rather get things done. It's easy to overlook the
-finer details of the systems you're using. In this case, we'll use MySQL
-inserts.
+Last year, I was poking around with optizing MySQL usage. Why is it slow when
+I'm querying & inserting data? Well, despite SQL being a generalized solution
+where you *should* Query Optimizer will try to find the best execution path --
+some things simply cannot be optimized. I found one way to increase read
+performance, and another to increase write performance.
 
-Most systems have a 'query' speed performance, and there are definitely ways to
-overcome this. But very seldom do we discuss write performance. If you're
-building backend services, performance is critical. Here are some nuggets I
-discovered in the process of trying to optimize MySQL batch inserts using JDBC.
+## Increasing Read Performance
+This provides some guidelines if you have nested subqueries and joining multiple tables.
 
-Note: my system uses an SSD.
+1. **Use the *least* number of joins possible in nested subqueries**: In MySQL,
+the `JOIN` step happens before `WHERE` get applied. If you prematurely `JOIN`
+table, you perform unnecessary `JOIN` operations because many of those rows will
+probably be filtered out in the `WHERE` statement. Where I worked previously, I
+managed to shrink a query that used to take `30s` down to `300ms` because the
+table had nearly a million records, and the query was prematurely joining all the
+records before filtering.
 
-Before Performance:
+2. **Query using only the indexes if possible**: Indexes are fast, if you don't
+   use an index, you have to scan the table, which is slow.
+
+[Use the index, Luke][luke] is really good resource to learn how to make SQL
+queries fast. Every application developer **should** check it out.
+
+[luke]: http://use-the-index-luke.com
+
+
+## Increasing Write Performance
+At some point, you will want to insert tens of thousands of records at once into
+your database. Maybe you're loading up test data, or you have a fat data
+pipeline.
+
+I discovered two tricks to help increase insert performance by a factor
+of 10. Note: I am using an SSD on my own machine.
+
+I used [JUnit Benchmarks][junit-benchmark] to re-run the insert tests over 10
+rounds. In the test, I try to insert 56240 records.
+
+### Initial Performance
+
 ```
 Processing Data + Writing (56240 records)
  round: 16.49 [+- 0.69], round.block: 0.00 [+- 0.00], round.gc: 0.00 [+- 0.00],
@@ -26,32 +52,42 @@ Processing Data + Writing (56240 records)
  time.bench: 164.93
 ```
 
-This gives us 3400 inserts/second.
+Extrapolating the math, 56240 records / 16.49 seconds = **3400 inserts/second**
 
+### Optimizations
 
-1) Enable `rewriteBatchedStatements=true`
-This is where *alot* of performance improvement comes from. TODO: I don't know
-internally waht's going on to make this speedup but it matters. (Maybe it has
-something to do with number 2).
+Later, I re-ran the microbenchmark after trying these two things:
 
-2) Order the data in BatchInserts
-Sorting order matters in BatchInsertions. If your data is already pre-sorted,
-you can get up to 10-20x speedup with JDBC. Your application probably sorts data
-sturctures much faster in memory.
+1. **Enable `rewriteBatchedStatements=true`**: With this connection option, JDBC
+   will try to pack as many statements into a single query. This saves roundtrip
+   times with a lot of records.
 
-After performance
+2. **Reorder the Batch Statement Records**: I found that if you pre-sort your
+   batch inserts in **primary-key** order, this considerably speeds up
+   performance. Given that you probably have more worker nodes that database
+   nodes -- you should **always** presort the data before sending it over the
+   wire. I suspect this is good because we don't have to thrash MySQL's index as
+   frequently (implementation detail perhaps?)
+
+### Performance After Applying both Optimizations
+
+I re-ran the same benchmark after applying both optimizations -- and the difference
+was impressive.
+
 ```
-56240 records
+Processing Data + Writing (56240 records)
  round: 1.68 [+- 0.16], round.block: 0.00 [+- 0.00], round.gc: 0.00 [+- 0.00],
  GC.calls: 73, GC.time: 2.09, time.total: 29.10, time.warmup: 12.27, time.bench:
  16.83
 
 ```
 
-This gives us a 10x speedup already.
+Extrapolating the math, 56240 records / 1.68 seconds = **33476
+inserts/second**. This gives us roughly **10x** speedup.
 
-33,476 insertions/second.
-
+### Analysis
+You should really try applying both optimizations -- especially when inserting
+large datasets.
 
 You may think that it doesn't really matter since we'll leave the database to
 sort the incoming data -- but (I think) MySQL doesn't care how the data comes
@@ -63,6 +99,4 @@ different b-trees.
 If your data is already pre-sorted by primary key order, MySQL will have much
 less cache-misses for index creation, and thus speedup insertion performances.
 
-
-
-There are several optimizations in place that that
+[junit-benchmark]: http://labs.carrotsearch.com/junit-benchmarks.html
