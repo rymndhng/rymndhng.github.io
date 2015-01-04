@@ -54,7 +54,7 @@ html {
 }
 @media (min-width: 38rem) {
   html {
-    font-size: 20px;
+    font-size: 16px;
   }
 }
 
@@ -361,7 +361,7 @@ tbody tr:nth-child(odd) th {
   overflow: hidden; /* clearfix */
   margin-left: -1rem;
   margin-right: -1rem;
-  font-family: "PT Sans", Helvetica, Arial, sans-serif;
+  font-family: "Latin Modern Roman Dunhill", Helvetica, Arial, sans-serif;
   color: #ccc;
   text-align: center;
 }

@@ -7,3 +7,12 @@
     font-family: "Latin Modern Roman";
     src: url("latin-modern-roman-regular.otf") format("opentype");
 }
+
+.masthead-title {
+    text-decoration: none;
+}
+
+.posts {
+    list-style-type: none;
+    padding-left:0;
+}
