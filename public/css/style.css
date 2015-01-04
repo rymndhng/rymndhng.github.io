@@ -1,0 +1,9 @@
+@font-face {
+    font-family: "Latin Modern Roman Dunhill";
+    src: url("latin-modern-roman-dunhill-regular.otf") format("opentype");
+}
+
+@font-face {
+    font-family: "Latin Modern Roman";
+    src: url("latin-modern-roman-regular.otf") format("opentype");
+}
