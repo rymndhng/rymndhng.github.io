@@ -22,5 +22,5 @@ BC. We're making this data available for parents & educators alike.
 Link: [http://www.rymndhng.com/fsa/](http://www.rymndhng.com/fsa/)
 
 ## Other Stuff
-I have varying levels of experience working on Ruby/Rails, Python/Django,
-Java/Spring, Scala/Play, PHP/CodeIgniter projects.
+I have varying levels of experience working on Clojure, Ruby/Rails,
+Python/Django, Java/Spring, Scala/Play, PHP/CodeIgniter projects.
