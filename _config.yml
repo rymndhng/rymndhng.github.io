@@ -7,7 +7,7 @@ permalink:        pretty
 # Setup
 title:            rymndhng
 tagline:          '(repeatedly #(do (coffee) (think) (write)))'
-description:      'Personal Blog about Software Engineering and etc.'
+description:      'Blog about Software Engineering and etc. Opinions are my own.'
 url:              http://rymndhng.github.io
 
 author:
