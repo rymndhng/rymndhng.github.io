@@ -1,5 +1,5 @@
 # Dependencies
-highlighter:      rouge
+highlighter:      nil           # colours are distracting
 
 # Permalinks
 permalink:        pretty

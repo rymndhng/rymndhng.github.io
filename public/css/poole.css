@@ -147,13 +147,11 @@ abbr[title] {
 /* Code */
 code,
 pre {
-  font-family: Cousine, Menlo, Monaco, "Courier New", monospace;
+  font-family: monospace, Menlo, Monaco, "Courier New", monospace;
 }
 code {
-  padding: .25em .5em;
-  font-size: 85%;
+  font-size: .85rem;
   color: #bf616a;
-  background-color: #f9f9f9;
   border-radius: 3px;
 }
 pre {
@@ -161,7 +159,7 @@ pre {
   margin-top: 0;
   margin-bottom: 1rem;
   padding: 1rem;
-  font-size: .7rem;
+  font-size: .75rem;
   line-height: 1.4;
   white-space: pre;
   overflow-wrap: normal;
