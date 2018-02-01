@@ -25,7 +25,15 @@
       </div>
       <hr/>
       <div class="container">
-        <h5>&copy; {{ site.time | date: '%Y' }}.</h5>
+          <small>
+              <a href="mailto:{{site.author.email}}">{{site.author.email}}</a>
+              <br>
+              <a href="{{site.twitter.url}}">@rymndhng</a>
+              <br>
+              <a href="{{site.github.url}}">{{site.github.url}}</a>
+              <br>
+              <br>
+          </small>
       </div>
     </div>
 

@@ -8,11 +8,12 @@ permalink:        pretty
 title:            rymndhng
 tagline:          '(repeatedly #(do (coffee) (think) (write)))'
 description:      'Blog about Software Engineering and etc. Opinions are my own.'
-url:              http://rymndhng.github.io
+url:              https://rymndhng.github.io
 
 author:
   name:           'Raymond Huang'
   url:            https://twitter.com/rymndhng
+  email:          rymndhng@gmail.com
 
 paginate:         5
 

@@ -3,7 +3,8 @@ layout: post
 title: "tools.namespace under the hood"
 date: 2018-01-31
 comments: true
-categories: clojure patterns explanation
+categories: blog
+tags: clojure software explanation
 ---
 
 `tools.namespace` is a utility library I use for Clojure projects. It helps
