@@ -197,6 +197,11 @@ I was curious why `*loaded-libs*` needs to exist at all. I've asked in the
 code that just exists. I'd love to hear a follow up from the core Clojure
 developers to uncover the mystery of `*loaded-libs*`.
 
+UPDATE (2018/02/04): I found a
+[blog](https://www.deepbluelambda.org/programming/clojure/how-clojure-works-namespace-metadata)
+with an answer for the mystery of `*loaded-libs*`. When using `require` with `:reload-all`, i.e. `(require my.ns
+:reload-all)`, `*loaded-libs*` ensures dependencies are only loaded once.
+
 ## How might tracking external files be implemented?
 
 Going back to TNS-48 [^1]. Why can't we have support for arbitrary files? From
