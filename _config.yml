@@ -19,6 +19,7 @@ paginate:         5
 
 plugins:
   - jekyll-paginate
+  - jekyll-org
 
 # Custom vars
 version:          1.0.0
