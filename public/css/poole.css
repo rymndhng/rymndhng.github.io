@@ -147,7 +147,7 @@ abbr[title] {
 /* Code */
 code,
 pre {
-  font-family: monospace, Menlo, Monaco, "Courier New", monospace;
+  font-family: "IBM Plex Mono", monospace, Menlo, Monaco, "Courier New", monospace;
 }
 code {
   font-size: .85rem;
@@ -165,7 +165,8 @@ pre {
   overflow-wrap: normal;
   word-break: break-all;
   word-wrap: break-word;
-  background-color: #f9f9f9;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
 }
 pre code {
   padding: 0;
