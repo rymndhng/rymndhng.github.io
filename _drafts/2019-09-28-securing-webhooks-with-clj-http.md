@@ -1,11 +1,11 @@
 ---
-title: Productionizing webhooks (with clj-http)
+title: Production Checklist for Webhooks (with clj-http)
 layout: post
-tags: clojure http webhooks
+tags: clojure http webhooks guide
 ---
 
 This is a distilled (living) checklist of things to think about for
-productionizing webhooks (with clj-http in mind). The document is broken into
+productionizing webhooks with clj-http in mind. The document is broken into
 three sections.
 
 1. Background
@@ -27,10 +27,11 @@ layer, which makes it easy to layer on cross-cutting customizations.
 
 1. Explicitly handle HTTP Response codes on a case-by-case basis.
 
-For `clj-http`, set `:throw-exceptions? false`. Webhooks work at the HTTP level,
-and your application *may* choose to handle 4xx and 5xx responses differently.
-For example, if a serrver responds with 4xx, you probably don't want to retry.
-If a server responds with 5xx, you *may* want to retry the request later.
+For outbound requests, set `:throw-exceptions? false`. Webhooks work at the HTTP
+level, and your application *may* choose to handle 4xx and 5xx responses
+differently. For example, if a serrver responds with 4xx, you probably don't
+want to retry. If a server responds with 5xx, you *may* want to retry the
+request later.
 
 2. Configure connection pooling (if it makes sense)
 
@@ -59,6 +60,13 @@ In `clj-http`, there are several strategies with configurable limits. I
 recommend using `:graceful` because it will allow you to handle `3xx` response
 codes. See point 1.
 
+6. Do not parse the response body
+
+Do not parse the response body if you can. You should not trust extenral servers
+to negotiate content correctly. For `clj-http`, you should avoid using output coercion.
+
+See [clj-http#output-coercion](https://github.com/dakrone/clj-http#output-coercion).
+
 # Security Considerations
 
 1. Change/Hide your user-agent
@@ -67,37 +75,74 @@ By default, all requests will include the header like this: `User-Agent:
 Apache-HttpClient/4.5.3 (Java/1.8.0_102)`. You should disable it, or set it
 explicitly in `clj-http` to be something more meaningful to your webhook system.
 
-2. Prevent invalidated host attacks. (See OWASP [Cheatsheet](https://cheatsheetseries.owasp.org/cheatsheets/Unvalidated_Redirects_and_Forwards_Cheat_Sheet.html))
+2. Prevent unvalidated host attacks
 
-Implement a whitelist or blacklist to prevent requests by checking Host IPs. 
+See OWAP Cheatsheet (See OWASP
+[Cheatsheet](https://cheatsheetseries.owasp.org/cheatsheets/Unvalidated_Redirects_and_Forwards_Cheat_Sheet.html)).
 
-For example, if you run your production webhook system on AWS EC2, you should
-blacklist webhooks that request and/or redirect to 169.254.169.254.
+This is a *very* important security consideration if your webhook system
+captures the HTTP Request/Response. For example, if your webhook system runs on
+AWS EC2, you should blacklist webhooks that request and/or redirect to
+169.254.169.254.
 
+The Host IP Address of the URL should be validated. Any redirects should also
+have their Location's Host IP Address validated.
 
+In `clj-http`, implement a custom middleware for validating the Host IP Address.
 
-For example, setup a blacklist to prevent requests made to your private
-network.
+For readers, a simple IP blacklist function can be implemented with Java-interop. See
+this example below:
 
-atOpen Redirect Attacks
+``` clojure
+(defn allowed-host?
+  "Checks whether the given Inet Address for outbound request is allowed"
+  [^java.net.InetAddress inet-addr]
+  (try
+    (not (or (.isLinkLocalAddress inet-addr) ; 169.0.0.0/8
+             (.isLoopbackAddress inet-addr)  ; 127.0.0.1
+             (.isAnyLocalAddress inet-addr)  ; 0.0.0.0
+             (.isMulticastAddress inet-addr) ; 224.0.0.0 to 239.255.255.255
+             (.isSiteLocalAddress inet-addr) ; 10.0.0.0/8, 192.168.0.0/16
+             ))
+    (catch Exception e
+      false)))
+```
 
-Attackers can 
+See [clj-http#custom-middleware](https://github.com/dakrone/clj-http#custom-middleware).
 
-You should have a blacklist setup to prevent webhooks from making requests to
-your internal network. Use 
+3. Prevent unvalidated host attacks in redirects
 
-Blacklist HFilter out hosts
+This is an extension of point (2). Implement a custom `:redirect-strategy` to validate the redirect location. If the host fails validation, halt redirect execution.
 
-Implement this using middlewares (why? because when you're testing locally, you're going to need to do funny things)
+4. Setup a Proxy Server with a Stable IP (use proxy host/port/user/pass)
 
-3. Blcoking redirects to internal infrastructure
+Sophisticated customers who receive webhooks will want to whitelist IP
+Addresses. Configure `clj-http` to make outbound requests through a proxy with
+`:proxy-host`, `:proxy-port`. If the proxy is secured, also add `:proxy-user`
+and `:proxy-pass`.
 
-4. setup a proxy server with a stable ip (use proxy host/port/user/pass)
+See [clj-http#proxies](https://github.com/dakrone/clj-http#proxies).
 
-# Logging/Storing Webhook Request/Responses
+# Logging & Storing Request/Response
 
-1. Filter out sensitive headers: authorization
-2. Capture, filtering, limiting response size
-3. filtering out sensitive data for logs
-4. logging, and not consuming the stream
-5. avoiding parsing the response body
+In your production system, you *may* want to log and/or store the webhook request responses. This is arguably the best part of working with clj-http. The request & response objects are "just data" which means its easy to serialize & deserialize.
+
+To capture the request & response, I recommend adding a custom middleware at the bottom of the list. This approach allows you to capture the request *after* all `clj-http` middleware is applied and *before* any `clj-http` middleware is applied to the response.
+
+This middleware should do the following things to avoid tampering with the request/response objects.
+
+1. Append the captured request/response to the response with a namespaced keyword.
+
+This is clojure. nuff said [rich hickey]
+
+2. Filter out sensitive data
+
+At minimum, the middleware should filter out the `Authorization` header. 
+
+3. Reset the InputStream if you consume it
+
+The response body is an InputStream. If you consume it, remember to reset it.
+
+4. Limit the captured response body
+
+With webhooks, you should limit the captured response body otherwise it could be used to exhaust your data store. 
