@@ -1,0 +1,103 @@
+#+BEGIN_HTML
+---
+title: CLojure Protobufs Example
+layout: post
+category: clojure
+tags: toolbox
+---
+#+END_HTML
+
+On the weekly hacknight <2015-03-09 Mon> -- I decided to play with Clojure and
+Protocol Buffers. Protocol Buffers is interchangeable data format by which code
+can be generated in multiple programming languages. One of it's goals is to
+unify the wire format across different languages.
+
+The particular use case I'm looking at was Google's [[https://developers.google.com/transit/gtfs-realtime/][GTFS]] format which is
+implemented by transit providers like [[https://developer.translink.ca/ServicesGtfs/ApiReference][Translink]] presumably to publish data onto
+Google Maps. Great idea.
+
+One downside to Protocol Buffers is the wire format. By default -- it's *not*
+human readable like JSON. This makes experimenting with the data slightly more
+difficult because you can't inspect it without having all your tooling setup.
+
+That said, I was able to dive in to explore transforming this data into Clojure
+data-structures using clojure-protobuf and lein-protobuf.
+
+Firstly, we need to grab dependencies.
+* Project Dependencies
+#+Name: project.clj
+#+BEGIN_SRC clojure name=
+(defproject quil-gtfs "0.0.1"
+  :description "Experiments"
+  :dependencies [[org.clojure/clojure "1.6.0"]
+                 [org.flatland/protobuf "0.8.1"]]
+  :plugins [[lein-protobuf "0.4.2"]])
+#+END_SRC
+
+Nothing too fancy here. We need the protobuf library when we work with code --
+and lein-protobuf to work with `.proto` files.
+* Code Exploration
+I worked off the GTFS [[https://developers.google.com/transit/gtfs-realtime/gtfs-realtime-proto][protobuf]] schema provided by Google. Through this -- I was
+able to play with clojure-protobuf which reads Java's generated protobuf code
+and translate that to Clojure datastructures (back and forth).
+
+#+BEGIN_SRC clojure
+  ;; Handle imports
+  (require '[flatland.protobuf.core :as protobuf])
+
+  ;; import protobuf generated class for deserialization
+  (import com.google.transit.realtime.GtfsRealtime$FeedMessage)
+
+  ;; generates the mapper between clojure datastructures and Java classes
+  (def feed-message (protobuf/protodef GtfsRealtime$FeedMessage))
+
+  ;; Try to read some sample data about a trip
+  (with-open [r (clojure.java.io/input-stream "resources/proto/trip.pb")]
+    (def trip (protobuf/protobuf-load-stream feed-message r)))
+
+  ;; The contents of trip maps directly to a feed-message
+  (keys trip)
+  ;; => (:header :entity)
+
+
+  ;; The contents of an entity
+  (first (:entity trip))
+  ;; => {:id "6314432", :is-deleted false, :trip-update {:trip {:trip-id "6314432"}, :vehicle {:id "2538", :label "2538"}, :stop-time-update [{:stop-id "142", :departure {:delay 0}, :schedule-relationship :scheduled}]}}
+
+
+  ;; Translink provides a second API for the positions
+  (with-open [r (clojure.java.io/input-stream "resources/proto/position.pb")]
+    (def position (protobuf/protobuf-load-stream feed-message r)))
+
+  ;; what's in here?
+  (keys position)
+                                          ;=> (:header :entity)
+
+  ;; This returns a feed header type
+  (:header position)
+  ;; => {:gtfs-realtime-version "1.0", :incrementality :full-dataset, :timestamp 1425536244}
+
+  ;; How big is this?
+  (count (:entity position))
+  ;; => 406
+
+
+  (first (:entity position))
+  ;; => {:id "6409094", :is-deleted false, :vehicle {:trip {:trip-id "6409094"}, :vehicle {:id "11304", :label "11304"}, :position {:latitude 49.326916, :longitude -123.13907}, :current-status :in-transit-to}}
+#+END_SRC
+* Future Works
+Clojure is a great way of exploring Protocol Buffers. The REPL makes it easy to
+explore the data format. The GTFS schema looks very useful for performing time
+series data analysis. It's *much* easier to aggregate this stream of events as
+opposed to the previous approach where we had to make multiple HTTP requests.
+
+Some problems: I encountered was that the clojure libraries work but aren't
+actively maintained.
+
+** TODO Fix lein-protobuf source directory
+Technically you don't really need lein-protobuf to do this demo -- but it's very
+convenient to run ~lein protobuf~ instead of downloading and compiling the
+protobuf code generator yourself.
+
+I submitted a patch [[https://github.com/flatland/lein-protobuf/pull/2][Pull#2]] which would update support for the latest version of
+protobufs
