@@ -304,6 +304,13 @@ tbody tr:nth-child(odd) th {
   margin-bottom: 4em;
 }
 
+/* Prevent images from going overboard */
+.post img {
+  max-width: 100%;
+  border: 1px #c0c0c0 solid;
+}
+
+
 /* Blog post or page title */
 .page-title,
 .post-title,
