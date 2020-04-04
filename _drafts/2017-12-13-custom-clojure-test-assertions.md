@@ -1,129 +1,100 @@
 ---
 layout: post
-title: "Custom clojure.test Assertions"
+title: "Creating Custom clojure.test Assertions"
 date: 2017-12-13
 comments: true
-categories: clojure patterns testing
+categories: clojure current-practise
 ---
 
-Custom test assertions increase developer productivity. It reduces boilerplate
-in test code. When implemented well, it helps developers identify where the test
-failures are.
+Clojure comes with a built-in testing library `clojure.test`. The library tiny.
+For consumers of the library, there's four constructs: `deftest`, `testing`,
+`is`, `are`.
 
-`clojure.test` has a mechanism for extending the test assertion that any
-intermediate developer can sink their teeth into.
-
-Implementing custom assertions uses Clojure Macros so it's recommended to brush
-up on understanding the basics. I like [Clojure for the Brave &
-True](https://www.braveclojure.com/writing-macros/).
-
-For the purpose of demo, we're going to implement a custom assertion `truthy?`.
-The goal is to be able to write this test:
+This solves most test cases. You can make any truthy assertion with `is`.
 
 ``` clojure
-(deftest my-test
-  (is (truthy? 1)))
+(deftest testing-equality
+  (is (= 1 0)))
 ```
 
-The final solution looks like this:
+Another nice feature of `clojure.test` is the ability to report on what caused
+the test assertion to fail. It leverages macros to understand the syntax of the
+code under test whereas other languages see a value (either true or false). This
+has the benefit of creating useful error messages for any test assertion.
+
+``` clojure
+(is (< 1 0))
+```
+
+In other languages & test libraries, you need to lean on using custom assertions
+to get useful error output. For example, this JUnit test relies on a
+`greaterThan`.
+
+```
+assertThat("timestamp",
+           Long.parseLong(previousTokenValues[1]),
+           greaterThan(Long.parseLong(currentTokenValues[1])));
+```
+
+In short, `clojure.test` allows you to express the essence of your test using
+assertions built-in to the language rather than having to use test-library
+assertions.
+
+## Custom Assertions
+Assertions can easily tell you when a statement is true or false. It can help
+you correct or identify mistakes too if you can give it enough hints.
+
+In the case of the JUnit example, the programmer needed to provide hints
+`greaterThan` to make the test reporting more useful in the case of failure. The
+`clojure.test` implementation doesn't need this extra hint for this particular
+case.
+
+You can extend the built-in assertions by extending the clojure.test multimethod:
 
 ```clojure
-(defmethod clojure.test/assert-expr 'truthy? [msg form]
-  (let [expr (second form)]
-    `(if ~expr
-       (t/do-report {:type :pass :message msg
-                     :expected '~form :actual "..."})
-       (t/do-report {:type :fail :message msg
-                     :expected '~form :actual "..."}))))
-```
-
-The following sections will explain the three parts of a custom `clojure.test` assertion:
-
-1. Registering the custom assertion
-2. Implementing the assertion
-3. Explaining the test result using clojure.test/do-report
-
-### 1. Registering the custom assertion
-
-``` clojure
-(defmethod clojure.test/assert-expr 'truthy? [msg form]
-  ;; ...
+(require '[clojure.test :as t])
+(defmulti t/assert-expr custom-assert!
+  ;; implementation
   )
+  
+;; To use this
+(is (custom-assert! foo))
 ```
 
-This is done by extending the multi-method `clojure.test/assert-expr`. 
+### When to use this pattern
 
-The arguments are msg and form. The `msg` is a custom error message (may be
-empty). The `form` is a s-expression of the test.
+You should consider this pattern when:
 
-### 2. Implementing the assertion
+- you need per-test granualarity for specific setup/teardown actions
+- you frequently need to format the test failure messages to be meaningful
+
+A case where we've found this invaluable is for performing RAML API and
+JsonSchema validations. Our integration tests use the clj-http client to make
+requests to our API. For each HTTP request we want to assert compliance with our
+RAML spec.
+
+For example, our custom assertion looks like:
 
 ``` clojure
-(defmethod clojure.test/assert-expr 'truthy? [msg form]
-  (let [expr (second form)]
-    `(if (true? ~expr)
-        ;; do something if true
-        ;; do something if false
-       )))
+(defmulti t/assert-expr valid-raml? 
+  ;;
+  )
+
+(is (valid-raml? (http/get "http://foo.bar.baz")))
 ```
 
-Your custom assertions should return new code for `clojure.test` to evaluate,
-similar to `defmacro`. For implementing truthy, we need to do two things:
+The `valid-raml?` assertion could do the following:
 
-1. extract the test expression
-2. return a new s-expression for clojure.test to evaluate
+1. Setup: Instruments clj-http with a custom middleware to check for API spec compliance
+2. Executes the body of the assertion using `http/get`
+3. Teardown: Report any API spec compliance issues
 
-In the example: `(is (truthy? 5) "hello")`, the arguments given to our assertion are:
-
-- `msg: "Hello"`
-- `form: '(truthy? 5)`
-
-The `form` contains the entire test expression. We need to call `(second form)`
-to extract the `5` from `form` to build our test assertion.
-
-### 3. Explaining the test result using clojure.test/do-report
-
-``` clojure
-(defmethod clojure.test/assert-expr 'truthy? [msg form]
-  (let [expr (second form)]
-    `(if ~expr
-       (t/do-report {:type :pass :message msg
-                     :expected '~form :actual "..."})
-       (t/do-report {:type :fail :message msg
-                     :expected '~form :actual "..."}))))
-```
-
-Use `clojure.test/do-report` to mark an assertion as passing, failing or
-erroring. This function takes a map of options.
-
-The `:type` is one of `:pass`, `:fail`. You may use `:error` when the unexpected
-happens, i.e exception thrown.
-
-The keys `:message`, `:expected`, `:actual` are used to provide additional
-context as needed to understand the test failure.
-
-## When to use this pattern
-
-You should consider this pattern if you are frequently:
-
-- creating per-assertion setup/teardown
-- need to format the test failure messages
-
-I've found this pattern to be invaluable for instrumenting our HTTP Client to
-check for RAML API Compliance. Our test assertion looks like the following:
-
-``` clojure
-(is (valid-raml? (http/get "http://my.api/leads")))
-```
-
-This custom assertion does the following:
-
-- Adds additional clj-http middleware to capture the request/response of the HTTP call
-- Executes the test body, presumably using clj-http
-- Checks the captured request/response for RAML compliance and report any failures
+This approach has reduced the boilerplate of our tests significantly. It easily:
+- tells us which line in the test caused the failure
+- formats the test failure so the developer can easily pinpoint what went wrong
 
 ## Gotchas
-Because this extends the built-in clojure.test library, new developers may be
-confused at what this piece of code does. It is opaque and you are unable to "Go
-to Definition" when hovering over a custom assertion.
+Because this extends the clojure.test library, new developers may be confused at
+what this piece of code does. When they try to get docs on this function, it
+will do nothing. 
 

@@ -1,7 +1,7 @@
 ---
 title: Production Checklist for Webhooks (with clj-http)
 layout: post
-tags: clojure http webhooks guide
+tags: clojure current-practise
 ---
 
 This is a distilled (living) checklist of things to think about for

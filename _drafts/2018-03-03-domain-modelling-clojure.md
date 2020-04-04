@@ -4,7 +4,7 @@ title: Domain Modelling in Clojure
 date: 2018-02-24
 comments: true
 categories: blog
-tags: clojure
+tags: clojure current-practise
 ---
 
 The rules here are guided from me taking on a Clojure project and learning from

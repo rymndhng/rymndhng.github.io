@@ -1,7 +1,7 @@
 ---
 title: Effective REPL-driven Clojure
 layout: post
-tags: clojure repl workflow
+tags: clojure repl current-practise
 ---
 
 Here are some techniques I use to get more mileage out of REPL-driven

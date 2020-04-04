@@ -1,7 +1,7 @@
 ---
 title: Computering Productivity
 layout: post
-tags: workflow
+tags: current-practise
 ---
 
 I work professionally as a Software Developer. I prefer working with the keyboard because I enjoy jumping around quickly, ...
