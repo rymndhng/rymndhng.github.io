@@ -334,6 +334,11 @@ tbody tr:nth-child(odd) th {
   color: #9a9a9a;
 }
 
+/* Footer */
+.feedback {
+  text-align: center;
+}
+
 /* Related posts */
 .related {
   padding-top: 2rem;

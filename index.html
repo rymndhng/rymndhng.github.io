@@ -7,23 +7,34 @@ title: rymndhng - home
   <h2> I am </h2>
   <div style="float: right">
     <ul class="connectors">
-
+      <li><a href="{{site.github.url}}">Github</a></li>
+      <li><a href="{{site.twitter.url}}">Twitter</></li>
+      <li><a href="mailto:{{site.author.email}}?Subject=RE: Your Blog">Email Me</a></li>
     </ul>
   </div>
-  <p>a full-stack software developer. My interests are in Clojure, Continuous Delivery Pipelines and trying to keep systems simple.
+  <p>a full-stack Software Developer. Most of the things I write seem to be about Clojure, so I guess I like it alot.</p>
+  <p>
+    I also have strong opinions (weakly held) on what makes effective software teams. Hint: There is no silver bullet, each team has to figure it out from ground-up.
   </p>
-  <p>Occasionally, I can twiddle browser languages, though not CSS to save my life.</p>
+  <h4>Some books I have enjoyed reading</h4>
+  <ul>
+    <li><a href="https://mitpress.mit.edu/sites/default/files/sicp/index.html">Structure & Interpretation of Computer Programs</a></li>
+    <li><a href="http://www.amazon.com/exec/obidos/ASIN/0321125215/domainlanguag-20">Domain-Driven Design: Tackling Complexity in the Heart of Software 1st Edition</a></li>
+    <li><a href="https://elementsofclojure.com"> Elements of Clojure</a></li>
+    <li><a href="https://www.principles.com">Ray Dalio: Principles</a></li>
+    <li><a href="https://basecamp.com/shapeup">Basecamp: Shape Up</a></li>
+  </ul>
 </div>
 <hr/>
 <div id="home">
   <h2>Blog Posts</h2>
   <ul class="related-posts">
     {% for post in site.posts %}
-      <li>
-          <a href="{{ post.url }}">
-              <small>{{ post.date | date: "%Y-%m-%d" }}</small> {{ post.title }}
-          </a>
-      </li>
+    <li>
+      <a href="{{ post.url }}">
+        <small>{{ post.date | date: "%Y-%m-%d" }}</small> {{ post.title }}
+      </a>
+    </li>
     {% endfor %}
   </ul>
 </div>
