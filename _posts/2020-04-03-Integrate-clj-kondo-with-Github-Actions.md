@@ -28,6 +28,7 @@ For linters, such as `clj-kondo`, Workflow commands can help highlight linter er
 
 3. Create a Github Action File in your repository: `.github/workflows/pr.yml` 
 
+{% raw %}
 ``` yaml
 name: Tests
 on: [ push ]
@@ -46,6 +47,7 @@ jobs:
         run: |
           clj-kondo --lint src --config '{:output {:pattern "::{{level}} file={{filename}},line={{row}},col={{col}}::{{message}}"}}'
 ```
+{% endraw %}
 
 #### Footnotes
 
