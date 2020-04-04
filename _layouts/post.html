@@ -31,3 +31,17 @@ layout: default
     {% endfor %}
   </ul>
 </div>
+<script type="text/javascript">
+ (function createHeadingAnchors() {
+   var headings = document.querySelectorAll('.post h2, .post h3, .post h4, .post h5');
+   for (heading of headings) {
+     if (heading.id && heading.id.startsWith("footnote")) {
+       // do nothing because we do not want to highlight footnotes
+     } else {
+       var span = document.createElement('span')
+       span.innerHTML = '<a class="heading-anchor" href="#' + heading.id + '">  ↩︎</a>'
+       heading.appendChild(span);
+     }
+   }
+ })()
+</script>

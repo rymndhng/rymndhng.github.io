@@ -100,6 +100,10 @@ h4, h5, h6 {
   font-size: 1rem;
 }
 
+.heading-anchor {
+  font-size: 0.75rem;
+}
+
 /* Body text */
 p {
   margin-top: 0;
