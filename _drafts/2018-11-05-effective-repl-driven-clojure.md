@@ -69,8 +69,10 @@ finer-grained tools like these.
 
 Example:
 
-    (require '[clojure.string :as thing])
-    (ns-unalias *ns* 'thing) ; *ns* refers to the current namespace
+``` clojure
+(require '[clojure.string :as thing])
+(ns-unalias *ns* 'thing) ; *ns* refers to the current namespace
+```
 
 # Re-open libraries for exploration
 
@@ -84,26 +86,28 @@ These monkey-patches only exist in the running REPL. I usually put them inside a
 In this example below, I re-open `clj-http.headers` to add tracing before the
 header transformation logic: [[source](https://github.com/dakrone/clj-http/blob/3.x/src/clj_http/headers.clj#L134-L140)]
 
-    ;; set us up for re-opening libraries
-    (require 'clj-http.headers)
-    (in-ns 'clj-http.headers)
-    
-    (defn- header-map-request
-      [req]
-      (let [req-headers (:headers req)]
-        (if req-headers
-          (do
-            (println "HEADERS: " req-headers) ;; <-- this is my added print
-            (-> req (assoc :headers (into (header-map) req-headers)
-                           :use-header-maps-in-response? true)))
-          req)))
-    
-    ;; Go back to to the user namespace to test the change
-    (in-ns 'user)
-    (require '[clj-http.client :as http])
-    (http/get "http://www.example.com")
-    ;; This is printed in the REPL:
-    ;;   HEADERS:  {accept-encoding gzip, deflate}
+``` clojure
+;; set us up for re-opening libraries
+(require 'clj-http.headers)
+(in-ns 'clj-http.headers)
+
+(defn- header-map-request
+  [req]
+  (let [req-headers (:headers req)]
+    (if req-headers
+      (do
+        (println "HEADERS: " req-headers) ;; <-- this is my added print
+        (-> req (assoc :headers (into (header-map) req-headers)
+                       :use-header-maps-in-response? true)))
+      req)))
+
+;; Go back to to the user namespace to test the change
+(in-ns 'user)
+(require '[clj-http.client :as http])
+(http/get "http://www.example.com")
+;; This is printed in the REPL:
+;;   HEADERS:  {accept-encoding gzip, deflate}
+```
 
 An astute observer will notice this workflow is no different from the regular
 clojure workflow. Clojure gets out of your way and allows you to shape &

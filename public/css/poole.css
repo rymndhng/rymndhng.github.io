@@ -169,8 +169,6 @@ pre {
   overflow-wrap: normal;
   word-break: break-all;
   word-wrap: break-word;
-  background-color: #f0f0f0;
-  border: 1px solid #ccc;
 }
 pre code {
   padding: 0;
@@ -178,9 +176,19 @@ pre code {
   color: inherit;
   background-color: transparent;
 }
+
+div.highlight {
+  margin-left: -50vw;
+  padding-left: 50vw;
+  background-color: #f5f7fa;
+  width: 200vw;
+  max-width: none;
+  overflow: wrap;
+}
+
 .highlight {
   margin-bottom: 1rem;
-  border-radius: 4px;
+  border-radius: 1px;
 }
 .highlight pre {
   margin-bottom: 0;

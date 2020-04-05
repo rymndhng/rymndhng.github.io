@@ -1,7 +1,7 @@
 ---
 title: Running clj-kondo with Github Actions
 layout: post
-tags: clojure workflow github ci
+tags: clojure current-practise github ci
 ---
 
 `clj-kondo` is a linter that sparks joy. This has definitely resonated with me.

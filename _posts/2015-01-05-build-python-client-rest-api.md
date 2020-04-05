@@ -12,36 +12,36 @@ categories: python
 
 When I worked at Sense Tecnic Systems, I needed to write a Python client for our
 REST API. We had another guy who wrote the API up, and the code shocked me. We
-had a file with 2000 lines, and every function looked like this [^1]:
+had a file with 2000 lines, and every function wlooked like this:
 
 ```python
-    def send_data_post(self, sensor_id, data, username = None, password = None):
-        """ Send new data to a sensor.
+def send_data_post(self, sensor_id, data, username = None, password = None):
+    """ Send new data to a sensor.
 
-        :param sensor_id: Sensor ID to send data to.
-        :type sensor_id: str.
-        :param data: Data to send to this sensor.
-        :type data: dict
-        :param username: If provided with password, overrides the default login credentials supplied on initialization.
-        :type username: str.
-        :param password: Used in combination with username.
-        :type password: str.
-        :raises: WotkitException if a status code is not 200's"""
-        #use SenseTecnic
-        #log.info("Sending data to wotkit for sensor " + sensor + ": " + str(attributes))
-        sensor_id = str(sensor_id)
-        auth_credentials = self._get_login_credentials(username, password)
-        url = self.api_url+'/sensors/'+sensor_id+'/data'
-        try:
-            response = requests.post(url = url, auth=auth_credentials, data = data)
-        except Exception as e:
-            raise WotkitException("Error in sending new data by POST to sensor at url: " + url + ". Error: " + str(e))
+    :param sensor_id: Sensor ID to send data to.
+    :type sensor_id: str.
+    :param data: Data to send to this sensor.
+    :type data: dict
+    :param username: If provided with password, overrides the default login credentials supplied on initialization.
+    :type username: str.
+    :param password: Used in combination with username.
+    :type password: str.
+    :raises: WotkitException if a status code is not 200's"""
+    #use SenseTecnic
+    #log.info("Sending data to wotkit for sensor " + sensor + ": " + str(attributes))
+    sensor_id = str(sensor_id)
+    auth_credentials = self._get_login_credentials(username, password)
+    url = self.api_url+'/sensors/'+sensor_id+'/data'
+    try:
+        response = requests.post(url = url, auth=auth_credentials, data = data)
+    except Exception as e:
+        raise WotkitException("Error in sending new data by POST to sensor at url: " + url + ". Error: " + str(e))
 
-        if response.ok:
-            log.debug("Success sending POST sensor data to url: " + url)
-            return True
-        else:
-            raise WotkitException("Error in sending new data by POST to sensor at url: " + url + "\n Response Code: " + str(response.status_code) + "\n Response Text: " + response.text.encode(response.encoding))
+    if response.ok:
+        log.debug("Success sending POST sensor data to url: " + url)
+        return True
+    else:
+        raise WotkitException("Error in sending new data by POST to sensor at url: " + url + "\n Response Code: " + str(response.status_code) + "\n Response Text: " + response.text.encode(response.encoding))
 ```
 
 ## Can we do better?
@@ -59,8 +59,7 @@ data = API.sensors.id(234).data.GET()
 ```
 
 <center>
-Ofcourse we can. This is why I wrote this post.
-![Yes we can!](http://arquivo.geledes.org.br/images/stories/miojo/obama_yes_we_can.jpg)
+Ofcourse we can!
 </center>
 
 ---------------------------
@@ -181,6 +180,9 @@ for api in test_apis:
 
 ## Source
 Here's the source code for the entire dsl + endpoints.
+
+<details markdown="1">
+<summary markdown="span">Example Code</summary>
 
 ```python
 import requests
@@ -341,5 +343,4 @@ class Base(RequestHandler):
 
 ```
 
-
-[^1]: https://github.com/SenseTecnic/wotkit-py/blob/master/wotkitpy.py#L528
+</details>
