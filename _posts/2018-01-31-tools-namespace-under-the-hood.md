@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "tools.namespace under the hood"
+title: "Exploring the design of clojure.tools.namespace"
 date: 2018-01-31
 comments: true
 categories: blog
