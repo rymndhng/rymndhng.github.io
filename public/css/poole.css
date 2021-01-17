@@ -151,7 +151,7 @@ abbr[title] {
 /* Code */
 code,
 pre {
-  font-family: "IBM Plex Mono", monospace, Menlo, Monaco, "Courier New", monospace;
+  font-family: Menlo, Monaco, "Courier New", monospace;
 }
 code {
   font-size: .85rem;
