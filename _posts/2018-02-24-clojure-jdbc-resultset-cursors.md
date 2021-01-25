@@ -106,6 +106,4 @@ engine. Your applications can be more responsive with cursors. Also, take the
 measurements here with a grain of salt. You should measure whether your
 application benefits from Cursors. 
 
-#### Footnotes
-
 [^1]: Kyle Burton wrote this up with an old version of clojure.java.jdbc whose API has changed. http://asymmetrical-view.com/2010/10/14/clojure-and-large-result-sets.html

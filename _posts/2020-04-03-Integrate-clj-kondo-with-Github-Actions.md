@@ -49,8 +49,6 @@ jobs:
 ```
 {% endraw %}
 
-#### Footnotes
-
 [^1]: Something to keep in mind with Third Party Github Actions is that you
     should strongly consider vetting 3rd Party Actions and pinning the versions
     to `sha` to reduce the likelihood of a [Supply Chain Attack].

@@ -342,6 +342,21 @@ tbody tr:nth-child(odd) th {
   color: #9a9a9a;
 }
 
+/* Foonotes */
+.footnotes:before {
+  border-top: 4px solid #c0c0c0;
+  width: 40px;
+  position: relative;
+  display: block;
+
+  font-family: "PT Sans";
+  content: "Footnotes";
+  
+  margin-top: 50px;
+  padding-top: 2px;
+  padding-bottom: 5px;
+}
+
 /* Footer */
 .feedback {
   text-align: center;
