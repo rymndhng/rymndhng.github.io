@@ -12,7 +12,7 @@ this up yourself. You do not need an intermediary [^1]. The setup I will show
 below integrates with Github Action's [Workflow Commands]. Workflow commands
 allow the build scripts to enrich the feedback provided to developers.
 
-[Workflow Commands]: (https://help.github.com/en/actions/reference/workflow-commands-for-github-actions#about-workflow-commands).
+[Workflow Commands]: https://help.github.com/en/actions/reference/workflow-commands-for-github-actions#about-workflow-commands
 
 For linters, such as `clj-kondo`, Workflow commands can help highlight linter errors.
 
