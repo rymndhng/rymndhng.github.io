@@ -15,11 +15,6 @@ author:
   url:            https://rymndhng.github.io
   email:          rymndhng+iterate@gmail.com
 
-paginate:         5
-
-plugins:
-  - jekyll-paginate
-
 # Custom vars
 version:          1.0.0
 
